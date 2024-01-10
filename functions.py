@@ -1,4 +1,5 @@
 import sqlite3
+import matplotlib.pyplot as plt
 
 def get_time_length(time_str:str) -> int:
     """
@@ -198,5 +199,42 @@ def read_SQL(file:str = "main.sql"):
     print(f"{file.name} Successfully Executed")
 
     connection.close()
+
+def graph_all_data():
+    """
+    Graphs all screentime data from the entire database
+
+    returns: None
+    """
+
+    plt.style.use('fivethirtyeight')
+
+    x_values = []
+    y_values = [] # Total screentime in minutes for a particular day
+
+    connection = sqlite3.connect('screen_time.sqlite')
+    cursor = connection.cursor()
+
+    cursor.execute(f"""
+                    SELECT entry_ID, SUM(time_duration) FROM App_Data
+                    LEFT JOIN Entry ON Entry.date_str = App_Data.date_str
+                    GROUP BY App_Data.date_str
+    """)
+    query = cursor.fetchall()
+
+    for row in query:
+        x_values.append(row[0])
+        y_values.append(row[1])
+    
+    connection.close()
+    
+    plt.title('Screen Time Data')
+    plt.xlabel('Day Number')
+    plt.xticks(ticks=x_values[::2])
+    plt.ylabel('Screen Time in Minutes')
+    plt.ylim(0, max(y_values) + 50)
+    plt.fill_between(x_values, y_values, color='#1f77b4', alpha=0.4)
+    plt.plot(x_values, y_values)
+    plt.show()
 
 # END OF FILE
