@@ -139,14 +139,37 @@ def execute_result():
 
             for app in new_apps:
                 cursor.execute(f"""
-                                INSERT INTO App_List
+                                INSERT INTO App_List (app_name)
                                 VALUES ('{app}');
                 """)
             
+            connection.commit()
             connection.close()
         else:
             print("CANCELED EXECUTION")
             return # Stops the function
+    
+    # Once all verifications are done, we continue with adding all the data to the database
+    connection = sqlite3.connect('screen_time.sqlite')
+    cursor = connection.cursor()
+    
+    # First, add the new entry data
+    cursor.execute(f"""
+                    INSERT INTO Entry (date_str)
+                    VALUES ('{result['date_str']}')
+    """)
+
+    # Then, go through each app data and add it to the database
+    # It contains the app at that particular date as well as how many minutes of screentime it was used on that day
+    for app in result['app_data']:
+        cursor.execute(f"""
+                        INSERT INTO App_Data (entry_ID, app_name, time_duration)
+                        VALUES ()
+        """) # RESUME
+    
+    print("EXECUTION FINISHED")
+    connection.commit()
+    connection.close()
 
 def read_SQL(file:str):
     """
