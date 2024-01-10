@@ -40,11 +40,12 @@ def read_command() -> dict:
         
         for line in file:
             line = line.strip()
+            # Adds the date string (which should be the first line in command.txt)
             if line_num == 1:
                 date_str = line
+            # Adds each app data where the app name is the key and the number of minutes is the value
             else:
                 line_data = line.split(':')
-                # app_data[line_data[0]] = line_data[1]
                 app_data[line_data[0]] = get_time_length(line_data[1])
 
             line_num += 1
@@ -65,13 +66,87 @@ def read_result(result:dict):
     for data in result["app_data"]:
         print(f"{data} - {result['app_data'][data]}")
 
+def value_in_table_column(table:str, column:str, value) -> bool:
+    """
+    Checks if a certain value in a table at a specific column exists
+
+    table: The table we want to check
+    column: The name of the column we want to check
+    value: The value we want to check if it exists in the table
+
+    returns: Boolean that tells us if the value exists in the table
+    """
+    
+    connection = sqlite3.connect('screen_time.sqlite')
+    cursor = connection.cursor()
+
+    cursor.execute(f"SELECT {column} FROM {table}")
+    query = cursor.fetchall()
+
+    # Table is empty
+    if len(query) == 0:
+        connection.close()
+        return False
+    
+    for result in query:
+        # Match found
+        if result[0] == value:
+            connection.close()
+            return True
+    
+    connection.close()
+
+    return False
+
 # RESUME
-def execute_result(result:dict):
+def execute_result():
     """
     Executes the result from read_command (i.e. add new data into the database)
 
     returns: None
     """
+
+    result = read_command()
+
+    # We first have the check that the date string currently isn't in the Entry database (to prevent duplicate entries)
+    if value_in_table_column("Entry", "date_str", result["date_str"]) == True:
+        print(f"DATE {result['date_str']} IS CURRENTLY IN THE DATABASE. CANCELED EXECUTION")
+        return # Stops the function
+    else:
+        print(f"DATE {result['date_str']} IS NEW. PROCEED")
+
+    # Then, go through each app and checks if any of them are new
+    # If any of them are new (i.e. currently not in the App_List database), verify to the user that new apps are detected
+    # If the user responds with "y", then proceed; otherwise, cancel the process (typo might've been made)
+    new_app_found = False
+    new_apps = []
+    for app in result["app_data"]:
+        if value_in_table_column("App_List", "app_name", app) == False: # New app found
+            new_app_found = True
+            new_apps.append(app)
+    
+    if new_app_found:
+        print("NEW APPS DETECTED")
+        for app in new_apps:
+            print(f"\t- {app}")
+        
+        verification = str(input("VERIFY THAT YOU WANT TO CONTINUE [y]: "))
+
+        if verification == "y":
+            print("ADDING NEW APPS TO App_List DATABASE")
+            connection = sqlite3.connect('screen_time.sqlite')
+            cursor = connection.cursor()
+
+            for app in new_apps:
+                cursor.execute(f"""
+                                INSERT INTO App_List
+                                VALUES ('{app}');
+                """)
+            
+            connection.close()
+        else:
+            print("CANCELED EXECUTION")
+            return # Stops the function
 
 def read_SQL(file:str):
     """
@@ -99,7 +174,7 @@ def read_SQL(file:str):
         cursor.execute(command[i])
     
     connection.commit()
-    print(f"{file} Successfully Executed")
+    print(f"{file.name} Successfully Executed")
 
     connection.close()
 
