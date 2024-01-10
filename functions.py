@@ -171,7 +171,7 @@ def execute_result():
     connection.commit()
     connection.close()
 
-def read_SQL(file:str):
+def read_SQL(file:str = "main.sql"):
     """
     Reads an executes an SQL file using sqlite3
 
