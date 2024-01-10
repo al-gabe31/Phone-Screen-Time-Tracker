@@ -112,8 +112,6 @@ def execute_result():
     if value_in_table_column("Entry", "date_str", result["date_str"]) == True:
         print(f"DATE {result['date_str']} IS CURRENTLY IN THE DATABASE. CANCELED EXECUTION")
         return # Stops the function
-    else:
-        print(f"DATE {result['date_str']} IS NEW. PROCEED")
 
     # Then, go through each app and checks if any of them are new
     # If any of them are new (i.e. currently not in the App_List database), verify to the user that new apps are detected
