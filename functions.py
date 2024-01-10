@@ -163,9 +163,9 @@ def execute_result():
     # It contains the app at that particular date as well as how many minutes of screentime it was used on that day
     for app in result['app_data']:
         cursor.execute(f"""
-                        INSERT INTO App_Data (entry_ID, app_name, time_duration)
-                        VALUES ()
-        """) # RESUME
+                        INSERT INTO App_Data (date_str, app_name, time_duration)
+                        VALUES ('{result['date_str']}', '{app}', {result['app_data'][app]})
+        """)
     
     print("EXECUTION FINISHED")
     connection.commit()
