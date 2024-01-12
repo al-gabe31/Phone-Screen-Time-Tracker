@@ -99,7 +99,6 @@ def value_in_table_column(table:str, column:str, value) -> bool:
 
     return False
 
-# RESUME
 def execute_result():
     """
     Executes the result from read_command (i.e. add new data into the database)
