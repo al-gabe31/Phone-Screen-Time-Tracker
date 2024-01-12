@@ -1,5 +1,6 @@
 import sqlite3
 import matplotlib.pyplot as plt
+import numpy as np
 
 def get_time_length(time_str:str) -> int:
     """
@@ -232,6 +233,7 @@ def graph_all_data():
     plt.xticks(ticks=x_values[::2])
     plt.ylabel('Screen Time in Minutes')
     plt.ylim(0, max(y_values) + 50)
+    plt.yticks(np.arange(0, max(y_values) + 60, 120))
     plt.fill_between(x_values, y_values, color='#1f77b4', alpha=0.4)
     plt.plot(x_values, y_values)
     plt.show()
