@@ -237,4 +237,55 @@ def graph_all_data():
     plt.plot(x_values, y_values)
     plt.show()
 
+def rename_app(old_name:str, new_name:str):
+    """
+    Renames an existing app name into a new one
+
+    old_name: The name of the app we want to change (has to exist)
+    new_name: The new name for the app (currently shouldn't exist in the App_List database)
+
+    returns: None
+    """
+
+    # VERIFICATIONS
+    # 1. old_name exists in the App_List database
+    # 2. new_name doesn't exist in the App_List database
+    passed_verification = True
+    error_code = -1
+    
+    if value_in_table_column('App_List', 'app_name', old_name) == False:
+        # old_name doesn't exist (fails verification)
+        print(f"ERROR - APP {old_name} CURRENTLY DOESN'T EXIST IN DATABASE")
+        return # Stops function
+    elif value_in_table_column('App_List', 'app_name', new_name) == True:
+        # new_name already exists (fails verification)
+        print(f"ERROR - NEW NAME {new_name} ALREADY EXISTS IN DATABASE")
+        return # Stops function
+    
+
+    
+    connection = sqlite3.connect('screen_time.sqlite')
+    cursor = connection.cursor()
+    
+    # 1. Add the new name to the App_List table
+    cursor.execute(f"""
+                    INSERT INTO App_List (app_name)
+                    VALUES ('{new_name}');
+    """)
+
+    # 2. Change all instances of the old name in the App_Data table to the new name
+    cursor.execute(f"""
+                    UPDATE App_Data
+                    SET app_name = '{new_name}'
+                    WHERE app_name = '{old_name}';
+    """)
+
+    # 3. Remove the old name in the App_List table
+    cursor.execute(f"""
+                    DELETE FROM App_List
+                    WHERE app_name = '{old_name}';
+    """)
+
+    connection.close()
+
 # END OF FILE
