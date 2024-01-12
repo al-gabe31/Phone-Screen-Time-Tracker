@@ -250,9 +250,6 @@ def rename_app(old_name:str, new_name:str):
     # VERIFICATIONS
     # 1. old_name exists in the App_List database
     # 2. new_name doesn't exist in the App_List database
-    passed_verification = True
-    error_code = -1
-    
     if value_in_table_column('App_List', 'app_name', old_name) == False:
         # old_name doesn't exist (fails verification)
         print(f"ERROR - APP {old_name} CURRENTLY DOESN'T EXIST IN DATABASE")
@@ -286,6 +283,7 @@ def rename_app(old_name:str, new_name:str):
                     WHERE app_name = '{old_name}';
     """)
 
+    connection.commit()
     connection.close()
 
 # END OF FILE
